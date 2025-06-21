@@ -9,7 +9,7 @@ import threading
 
 import time
 def fibo():
-    n=25  
+    n=35  
     if n<=1:
         print(f"n= {n}, програма завершила свою роботу")
         return n
@@ -24,22 +24,22 @@ def fibo():
 
 
 def print_text():
-    alt='''Lorem Ipsum is simply dummy text of the printing and typesetting industry. 
+    text='''Lorem Ipsum is simply dummy text of the printing and typesetting industry. 
     Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, 
     when an unknown printer took a galley of '''
     for i in range(22):
         time.sleep(0.3)
-        print(alt[i])
+        print(text[i])
 
 start_time1 = time.perf_counter()
 thread1 = threading.Thread(target=fibo)
-thread2 = threading.Thread(target=print_text)
+# thread2 = threading.Thread(target=print_text)
 
 thread1.start()
-thread2.start()
+# thread2.start()
 
 thread1.join()
-thread2.join()
+# thread2.join()
 end_time1 = time.perf_counter()
 print("ThreadPoolExecutor")
 from concurrent.futures import ThreadPoolExecutor
@@ -92,4 +92,79 @@ print(f"\n Всі завдання завершено за {end_time - start_tim
 #  а інша функція чекає на цю подію і у разі її виникнення виконує видалення цього файлу.
 #   Якщо рядки «Wow!» не було знайдено у файлі, 
 # то засипати на 5 секунд. Створіть файл руками та перевірте виконання програми.
-time.sleep(5)
+import threading
+import time
+import os
+
+file_found_event = threading.Event()
+
+FILE_NAME = "my_test_file.txt"
+SEARCH_STRING = "Wow!"
+
+def read_and_check_file():
+
+    print(f"Потік читання: Пошук файлу '{FILE_NAME}'...")
+    while True:
+        if not os.path.exists(FILE_NAME):
+            print(f"Потік читання: Файл '{FILE_NAME}' не знайдено. Засипаю на 5 секунд...")
+            time.sleep(5)
+            continue
+
+        print(f"Потік читання: Файл '{FILE_NAME}' знайдено. Відкриваю для пошуку рядка...")
+        found = False
+        try:
+            with open(FILE_NAME, 'r', encoding='utf-8') as f:
+                for line_num, line in enumerate(f, 1):
+                    if SEARCH_STRING in line:
+                        print(f"Потік читання: Рядок '{SEARCH_STRING}' знайдено у файлі '{FILE_NAME}' на рядку {line_num}.")
+                        found = True
+                        break
+            if found:
+                print("Потік читання: Генерую подію")
+                file_found_event.set() 
+                break 
+            else:
+                print(f"Потік читання: Рядок '{SEARCH_STRING}' не знайдено у файлі '{FILE_NAME}'. Засинаю на 5 секунд...")
+                time.sleep(5)
+        except IOError as e:
+            print(f"Потік читання: Помилка при читанні файлу '{FILE_NAME}': {e}. Засинаю на 5 секунд...")
+            time.sleep(5)
+        except Exception as e:
+            print(f"Потік читання: Несподівана помилка: {e}. Засинаю на 5 секунд...")
+            time.sleep(5)
+
+def delete_file_on_event():
+
+    print("Потік видалення: Очікую подію 'файл знайдено'...")
+    file_found_event.wait() 
+    
+    print("Потік видалення: Подія отримана! Видаляю файл...")
+    try:
+        if os.path.exists(FILE_NAME):
+            os.remove(FILE_NAME)
+            print(f"Потік видалення: Файл '{FILE_NAME}' успішно видалено.")
+        else:
+            print(f"Потік видалення: Файл '{FILE_NAME}' вже не існує.")
+    except OSError as e:
+        print(f"Потік видалення: Помилка при видаленні файлу '{FILE_NAME}': {e}")
+    except Exception as e:
+        print(f"Потік видалення: Несподівана помилка при видаленні: {e}")
+
+def main():
+    """Основна функція для запуску потоків."""
+    print("Запускаю програму...")
+
+    reader_thread = threading.Thread(target=read_and_check_file)
+    reader_thread.start()
+
+
+    deleter_thread = threading.Thread(target=delete_file_on_event)
+    deleter_thread.start()
+
+
+    reader_thread.join()
+    deleter_thread.join()
+
+    print("Програма завершила роботу.")
+
+main()
