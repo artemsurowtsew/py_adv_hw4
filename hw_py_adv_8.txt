@@ -1,0 +1,32 @@
+# Завдання 1
+# Створіть у проекті віртуальне оточення virtualenv з назвою test_venv 
+# та активуйте його у проекті. Додайте й нього наступний перелік інструментів:
+# * python 3.8;
+# * Django 3.2;
+# * Beautiful Soup 3
+# * Pillow 2.3.0.
+# Деактивуйте його.
+
+pip install virtualenv
+virtualenv test_venv -p python3.8
+pip install django==3.2
+pip install BeautifulSoup                        (3.22)
+pip install Pillow==2.3.0
+deactivate
+$ rm -rf test_venv
+
+
+Завдання 2
+Створіть у проекті віртуальне оточення poetry з назвою test_poetry та активуйте його у проекті(https://python-poetry.org/docs/). Додайте й нього наступний перелік інструментів:
+* python 3.9;
+* Django 3.1;
+* Beautiful Soup 4
+* Pillow 8.3.2 
+Деактивуйте його.
+pip install poetry
+poetry new test_poetry
+Created package test_poetry in test_poetry
+PS C:\Users\Artem\Desktop\Python_1> 
+poetry add django@3.1
+poetry add bs4
+poetry add Pillow@8.3.2
